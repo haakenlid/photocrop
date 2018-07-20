@@ -1,0 +1,2 @@
+# photocrop
+React photo cropper
