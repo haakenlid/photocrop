@@ -1,14 +1,32 @@
 import React from 'react'
 
 import { storiesOf } from '@storybook/react'
-import { action } from '@storybook/addon-actions'
-import { linkTo } from '@storybook/addon-links'
+import { select, object, withKnobs } from '@storybook/addon-knobs'
 
-import { Button, Welcome } from '@storybook/react/demo'
 import CropBox from '../src'
 import newton from './blake_newton.jpg'
+import dragon from './dragon.jpg'
+import nebuchadnezzar from './nebuchadnezzar.jpg'
+import urizen from './urizen.jpg'
+
+const selectImage = () =>
+  select(
+    'Image',
+    {
+      newton,
+      dragon,
+      nebuchadnezzar,
+      urizen,
+      'no image': '',
+      'not found': '404.jpg',
+    },
+    newton,
+  ) || undefined
 
 storiesOf('CropBox', module)
-  .add('no props', () => <CropBox />)
-  .add('with src', () => <CropBox src={newton} />)
-  .add('broken src', () => <CropBox src={'foo.jpg'} />)
+  .addDecorator(withKnobs)
+  .addDecorator(story => <div style={{ height: '100vh' }}>{story()}</div>)
+  .add('crop', () => <CropBox src={selectImage()} />)
+  .add('previews', () => (
+    <CropBox src={selectImage()} previews={object('Previews', [0.5, 1, 2])} />
+  ))

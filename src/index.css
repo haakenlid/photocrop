@@ -1,3 +1,6 @@
+body {
+  margin: 0; }
+
 @keyframes marching_ants {
   0% {
     stroke-dashoffset: 0; }
@@ -8,6 +11,7 @@
   stroke-dasharray: 6; }
 
 .Overlay {
+  touch-action: none;
   overflow: visible;
   height: 100%;
   z-index: 10;
@@ -50,5 +54,27 @@
     @media (hover: none) {
       .Overlay .Handle {
         stroke-width: 1rem; } }
+
+.CropBoxContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%; }
+  .CropBoxContainer .CropBox {
+    display: flex;
+    flex: 1;
+    flex-direction: column; }
+  .CropBoxContainer .CropPreview {
+    flex-shrink: 0; }
+
+.CropPreview {
+  display: flex;
+  margin-left: -0.4rem;
+  margin-bottom: 0.4rem; }
+  .CropPreview .PreviewImg {
+    margin-left: 0.4rem; }
+    .CropPreview .PreviewImg svg {
+      display: block;
+      max-height: 100%; }
 
 /*# sourceMappingURL=index.css.map */

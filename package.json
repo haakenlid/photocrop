@@ -11,17 +11,22 @@
   "repository": "github:haakenlid/photocrop",
   "author": "Håken Lid <haakenlid@gmail.com> (http://håken.no)",
   "license": "MIT",
-  "devDependencies": {
-    "jest": "^23.5.0",
-    "@storybook/react": "^3.4.10",
-    "@storybook/addon-actions": "^3.4.10",
-    "@storybook/addon-links": "^3.4.10",
-    "@storybook/addons": "^3.4.10",
-    "babel-core": "^6.26.3",
-    "babel-runtime": "^6.26.0"
-  },
   "dependencies": {
     "react": "^16.4.2",
     "react-dom": "^16.4.2"
+  },
+  "peerDependencies": {
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2"
+  },
+  "devDependencies": {
+    "@storybook/addon-knobs": "^4.0.0-alpha.16",
+    "@storybook/addons": "^4.0.0-alpha.16",
+    "@storybook/react": "^4.0.0-alpha.16",
+    "ajv": "^6.5.2",
+    "babel-core": "^6.26.3",
+    "babel-runtime": "^6.26.0",
+    "jest": "^23.5.0",
+    "moment": "^2.22.2"
   }
 }

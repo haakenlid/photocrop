@@ -1,6 +1,9 @@
 $ant_size: 6;
 $march_speed: 0.5s;
 $march_lunges: 10;
+body {
+  margin: 0;
+}
 
 @keyframes marching_ants {
   0% {
@@ -20,6 +23,7 @@ $march_lunges: 10;
 }
 
 .Overlay {
+  touch-action: none;
   overflow: visible;
   height: 100%;
   z-index: 10;
@@ -77,5 +81,32 @@ $march_lunges: 10;
     }
     fill: red;
     opacity: 0;
+  }
+}
+.CropBoxContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  .CropBox {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+  .CropPreview {
+    flex-shrink: 0;
+  }
+}
+.CropPreview {
+  $margin: 0.4rem;
+  display: flex;
+  margin-left: -$margin;
+  margin-bottom: $margin;
+  .PreviewImg {
+    margin-left: $margin;
+    svg {
+      display: block;
+      max-height: 100%;
+    }
   }
 }

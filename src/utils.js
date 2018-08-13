@@ -1,3 +1,18 @@
+// clamp number between min and max
+const clamp = (min, max) => n => Math.max(min, Math.min(n, max))
+
+// round to precision 4
+export const round = num => Number(num.toPrecision(4))
+
+// relative ratio between low and high
+const ratioOf = (low, val, high) =>
+  high === low ? 0.5 : (val - low) / (high - low)
+
+// format number 0.5 -> '50%'
+const numberToPercent = number => `${(100 * number).toFixed(1)}%`
+
+// normalize cropbox. Make sure it's not outside of bounds,
+// that top < bottom etc.
 export const normalize = ({ x, y, left, top, right, bottom }) => {
   const func = (a, b) => a - b
   const h_sorted = [0, 0, left, right, 1, 1].sort(func)
@@ -12,6 +27,7 @@ export const normalize = ({ x, y, left, top, right, bottom }) => {
   }
 }
 
+// make sure cropbox has a minimum size
 export const minsize = size => ({ left, right, top, bottom, x, y }) => {
   if (right - left < size) {
     const c = (left + right) / 2
@@ -25,11 +41,6 @@ export const minsize = size => ({ left, right, top, bottom, x, y }) => {
   }
   return normalize({ x, y, left, right, top, bottom })
 }
-
-export const round = num => Number(num.toPrecision(4))
-const ratioOf = (low, val, high) =>
-  high === low ? 0.5 : (val - low) / (high - low)
-const numberToPercent = number => `${(100 * number).toFixed(1)}%`
 
 const closeCrop = (x, y, l, r, t, b, A) => {
   const w = r - l
@@ -57,7 +68,7 @@ export const getStyles = (src, crop_box, imgRatio, frameRatio) => {
   const width = right - left
   const height = bottom - top
   return {
-    backgroundImage: `url(${src})`,
+    backgroundImage: `url("${src}")`,
     backgroundPosition: [[width, right, 1], [height, bottom, 1]]
       .map(dim => ratioOf(...dim))
       .map(numberToPercent)
@@ -67,15 +78,14 @@ export const getStyles = (src, crop_box, imgRatio, frameRatio) => {
   }
 }
 
+// download image and find pixel width and height
 export const getImageSize = src =>
   new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => resolve([img.width, img.height])
-    img.onerror = err => reject(err)
+    img.onerror = reject
     img.src = src
   })
-
-const clamp = (min, max) => n => Math.max(min, Math.min(n, max))
 
 export const getRelativePosition = element => e => {
   const { left, top, width, height } = element.getBoundingClientRect()

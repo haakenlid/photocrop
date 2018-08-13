@@ -1,9 +1,0 @@
-<svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600px" height="400px" viewBox="0 0 600 400" >
-<svg width='50%' x='50%' overflow='visible' viewBox="0 0 100 80" >
-<g transform="translate(-50 0)" fill="#bbb"> 
- <path  d="m0 0v80h100v-80zm91.9 71.3h-83.4v-62.6h83.4z"/>
- <path  d="m56.1 28.9l-20.3 21.8-6.8-3-17.3 18.8h76.7l-20.3-30-3.8 2.2-8.2-9.8z"/>
- <circle r="7.5" cy="24.5" cx="32.8"/> 
-</g>
-</svg>
-</svg>
