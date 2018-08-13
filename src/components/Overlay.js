@@ -12,12 +12,12 @@ const cursors = new Map([
 ])
 
 const Handle = ({ name, cursor, startDragHandleFactory }) => {
-  const handleSize = 0.1
+  const handleSize = 0.2
   const mask = name.split('').map(parseFloat)
   return (
     <rect
       className="Handle"
-      onPointerDown={startDragHandleFactory(mask)}
+      onPointerDown={startDragHandleFactory(mask, cursor)}
       width={1 - mask[0] - mask[2] + handleSize}
       height={1 - mask[1] - mask[3] + handleSize}
       x={mask[2] - handleSize / 2}
@@ -27,22 +27,28 @@ const Handle = ({ name, cursor, startDragHandleFactory }) => {
   )
 }
 
+const Cross = ({ x, y }) => (
+  <path className="cross" d={`M0, ${y}H1M${x}, 0V1`} />
+)
+
 const Overlay = ({
   size,
   pending,
   crop_box,
   startDragHandleFactory,
+  startMoveCross,
+  startMoveCropBox,
   startNewCrop,
+  dragging,
 }) => {
   const { left, x, right, top, y, bottom } = crop_box
   const boxPath = `M${left}, ${top}V${bottom}H${right}V${top}Z`
   const outerPath = 'M0, 0H1V1H0Z'
   const circleRadius = rx => ({ rx, ry: rx * size[0] / size[1] || rx })
-  const startMoveCropBox = startDragHandleFactory([1, 1, 1, 1, 0])
-  const startMoveCenter = startDragHandleFactory([0, 0, 0, 0, 1])
+  const style = dragging ? { cursor: dragging.cursor } : {}
 
   return (
-    <svg>
+    <svg style={style}>
       <svg
         className="Overlay"
         viewBox="0 0 1 1"
@@ -58,35 +64,38 @@ const Overlay = ({
         />
         <g className={`inside${pending ? ' pending' : ''}`}>
           <path onPointerDown={startMoveCropBox} className="box" d={boxPath} />
-          <svg
-            className="handles"
-            viewBox="0 0 1 1"
-            preserveAspectRatio="none"
-            height={bottom - top}
-            width={right - left}
-            x={left}
-            y={top}
-          >
-            {Array.from(cursors).map(([name, cursor]) => (
-              <Handle
-                key={name}
-                name={name}
-                cursor={cursor}
-                startDragHandleFactory={startDragHandleFactory}
-              />
-            ))}
-          </svg>
+          {dragging ? null : (
+            <svg
+              className="handles"
+              viewBox="0 0 1 1"
+              preserveAspectRatio="none"
+              height={bottom - top}
+              width={right - left}
+              x={left}
+              y={top}
+            >
+              {Array.from(cursors).map(([name, cursor]) => (
+                <Handle
+                  key={name}
+                  name={name}
+                  cursor={cursor}
+                  startDragHandleFactory={startDragHandleFactory}
+                />
+              ))}
+            </svg>
+          )}
         </g>
         <g className="centerPoint">
-          <ellipse
-            className="handle"
-            style={{ opacity: 0 }}
-            onPointerDown={startMoveCenter}
-            cx={x}
-            cy={y}
-            {...circleRadius(0.05)}
-          />
-          <path className="cross" d={`M0, ${y}H1M${x}, 0V1`} />
+          {dragging ? null : (
+            <ellipse
+              className="Handle"
+              onPointerDown={startMoveCross}
+              cx={x}
+              cy={y}
+              {...circleRadius(0.05)}
+            />
+          )}
+          <Cross x={x} y={y} />
         </g>
       </svg>
     </svg>

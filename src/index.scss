@@ -17,8 +17,6 @@ $march_lunges: 10;
 }
 
 .CropBox {
-  max-height: 100%;
-  overflow: scroll;
 }
 
 .Overlay {
@@ -34,14 +32,14 @@ $march_lunges: 10;
   rect,
   ellipse {
     vector-effect: non-scaling-stroke;
-    fill: rgba(0, 0, 0, 0);
+    fill: transparent; // must have fill to capture pointer event
   }
   .outside {
     fill: rgba(0, 0, 0, 0.5);
   }
   .centerPoint {
     position: relative;
-    .handle {
+    .Handle {
       cursor: crosshair;
       &:hover + .cross {
         stroke: rgba(255, 255, 0, 1);
@@ -57,7 +55,7 @@ $march_lunges: 10;
   .inside {
     .box {
       stroke: rgba(255, 255, 255, 0.3);
-      cursor: move;
+      // cursor: move;
     }
     &:hover .box {
       stroke: rgba(255, 255, 255, 0.8);
@@ -70,9 +68,14 @@ $march_lunges: 10;
     .handles {
       overflow: visible;
     }
-    .Handle {
-      fill: red;
-      opacity: 0.2;
+  }
+  .Handle {
+    stroke: blue;
+    stroke-width: 0;
+    @media (hover: none) {
+      stroke-width: 1rem;
     }
+    fill: red;
+    opacity: 0;
   }
 }

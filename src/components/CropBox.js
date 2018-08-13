@@ -25,11 +25,13 @@ class CropBox extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = { dragging: null, crop_box: props.crop_box }
+    this.state = { dragging: null, crop_box: props.crop_box, click: false }
     this.startNewCrop = this.startNewCrop.bind(this)
     this.moveDragHandle = this.moveDragHandle.bind(this)
     this.endDragHandle = this.endDragHandle.bind(this)
     this.startDragHandleFactory = this.startDragHandleFactory.bind(this)
+    this.startMoveCross = this.startMoveCross.bind(this)
+    this.startMoveCropBox = this.startMoveCropBox.bind(this)
   }
 
   setImageSize = () => {
@@ -39,7 +41,9 @@ class CropBox extends React.Component {
 
   componentDidMount() {
     this.setImageSize()
-    this.element.addEventListener('touchstart', e => e.preventDefault())
+    this.element.addEventListener('touchstart', e => {
+      e.preventDefault()
+    })
   }
   componentDidUpdate(prevProps) {
     if (prevProps.src != this.props.src) this.setImageSize()
@@ -58,6 +62,7 @@ class CropBox extends React.Component {
         bottom: my,
       },
       dragging: {
+        cursor: 'move',
         dragMask: [1, 1, 0, 0, 0],
         initialPosition: [mx, my],
         initialCrop: crop_box,
@@ -65,7 +70,7 @@ class CropBox extends React.Component {
     })
   }
   moveDragHandle(e) {
-    const { crop_box, dragging } = this.state
+    const { click, crop_box, dragging } = this.state
     if (!dragging) return
     const [mx, my] = this.getRelativePosition(e)
     const { dragMask, initialPosition: [ix, iy], initialCrop: ic } = dragging
@@ -87,29 +92,52 @@ class CropBox extends React.Component {
     }
     top > bottom && ([dt, db] = [db, dt])
     left > right && ([dl, dr] = [dr, dl])
+    if (click) {
+      if (Math.abs(dx) + Math.abs(dy) > 0.1) this.setState({ click: false })
+    }
     this.setState({
       dragging: { ...this.state.dragging, dragMask: [dl, dt, dr, db, dc] },
       crop_box: normalize({ x, y, left, top, right, bottom }),
     })
   }
 
-  startDragHandleFactory(dragMask) {
+  startDragHandleFactory(dragMask, cursor = 'move') {
     return e => {
-      e.preventDefault()
       this.element.setPointerCapture(e.pointerId)
-      this.setState({
+      const update = {
         dragging: {
+          cursor,
           dragMask,
           initialCrop: this.state.crop_box,
           initialPosition: this.getRelativePosition(e),
         },
-      })
+      }
+      // use timeout here to await touchstart preventDefault before target
+      // element is removed from the dom
+      setTimeout(() => this.setState(update), 0)
     }
+  }
+  startMoveCropBox(e) {
+    this.startDragHandleFactory([1, 1, 1, 1, 0])(e)
+    this.setState({ click: true })
+    // simulate click with pointer events
+    setTimeout(() => this.setState({ click: false }), 200)
+  }
+  startMoveCross(e) {
+    this.startDragHandleFactory([0, 0, 0, 0, 1])(e)
   }
 
   endDragHandle(e) {
-    const crop_box = minsize(0.1)(this.state.crop_box)
-    this.setState({ crop_box, dragging: null })
+    const { click, crop_box, dragging } = this.state
+    if (!dragging) return
+    let new_crop_box
+    if (click) {
+      const { initialCrop, initialPosition: [x, y] } = dragging
+      new_crop_box = { ...initialCrop, x, y }
+    } else {
+      new_crop_box = minsize(0.1)(crop_box)
+    }
+    this.setState({ crop_box: new_crop_box, dragging: null, click: false })
   }
 
   render() {
@@ -140,7 +168,10 @@ class CropBox extends React.Component {
             <Overlay
               crop_box={crop_box}
               size={size}
+              dragging={dragging}
               startNewCrop={this.startNewCrop}
+              startMoveCross={this.startMoveCross}
+              startMoveCropBox={this.startMoveCropBox}
               startDragHandleFactory={this.startDragHandleFactory}
             />
           </svg>
