@@ -2,10 +2,11 @@
   "name": "@haakenlid/photocrop",
   "version": "0.1.1",
   "description": "photo cropping with react",
-  "main": "src/index.js",
+  "main": "dist/bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "start-storybook -p 6006",
+    "build": "webpack",
     "build-storybook": "build-storybook -o docs"
   },
   "repository": "github:haakenlid/photocrop",
@@ -25,8 +26,18 @@
     "@storybook/react": "^4.0.0-alpha.16",
     "ajv": "^6.5.2",
     "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
     "babel-runtime": "^6.26.0",
+    "css-loader": "^1.0.0",
     "jest": "^23.5.0",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "node-sass": "^4.9.3",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.22.1",
+    "url-loader": "^1.1.0",
+    "webpack": "^4.16.5",
+    "webpack-command": "^0.4.1"
   }
 }

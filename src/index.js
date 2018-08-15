@@ -1,3 +1,3 @@
-import CropBox from './components/CropBoxContainer.js'
-import './index.css'
+import CropBox from './components/CropBoxContainer'
+import './index.scss'
 export default CropBox
