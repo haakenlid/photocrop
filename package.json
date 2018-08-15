@@ -1,6 +1,6 @@
 {
   "name": "@haakenlid/photocrop",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "photo cropping with react",
   "main": "dist/bundle.js",
   "scripts": {
