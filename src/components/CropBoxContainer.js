@@ -7,8 +7,7 @@ import {
 } from '../utils.js'
 import CropBox from './CropBox.js'
 import CropPreview from './CropPreview.js'
-import p from './placeholder.svg'
-const placeholder = JSON.parse(p)
+import placeholder from './placeholder.svg'
 
 const Loader = ({ error }) => (
   <img style={{ background: error ? 'red' : 'black' }} src={placeholder} />
