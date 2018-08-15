@@ -1,5 +1,5 @@
 {
-  "name": "photocrop",
+  "name": "@haakenlid/photocrop",
   "version": "0.1.0",
   "description": "photo cropping with react",
   "main": "src/index.js",
