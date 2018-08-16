@@ -34,14 +34,15 @@ const Cross = ({ x, y }) => (
 const Overlay = ({
   size,
   pending,
-  crop_box,
+  cropBox,
   startDragHandleFactory,
   startMoveCross,
   startMoveCropBox,
   startNewCrop,
+  clickInner,
   dragging,
 }) => {
-  const { left, x, right, top, y, bottom } = crop_box
+  const { left, x, right, top, y, bottom } = cropBox
   const boxPath = `M${left}, ${top}V${bottom}H${right}V${top}Z`
   const outerPath = 'M0, 0H1V1H0Z'
   const circleRadius = rx => ({ rx, ry: rx * size[0] / size[1] || rx })
@@ -63,7 +64,12 @@ const Overlay = ({
           onPointerDown={startNewCrop}
         />
         <g className={`inside${pending ? ' pending' : ''}`}>
-          <path onPointerDown={startMoveCropBox} className="box" d={boxPath} />
+          <path
+            onClick={clickInner}
+            onPointerDown={startMoveCropBox}
+            className="box"
+            d={boxPath}
+          />
           {dragging ? null : (
             <svg
               className="handles"

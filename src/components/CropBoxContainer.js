@@ -13,10 +13,12 @@ const Loader = ({ error }) => (
   <img style={{ background: error ? 'red' : 'black' }} src={placeholder} />
 )
 
+const noop = () => null
+
 class CropBoxWrapper extends React.Component {
   static defaultProps = {
     Loader,
-    crop_box: {
+    cropBox: {
       left: 0.1,
       right: 0.9,
       top: 0.1,
@@ -26,14 +28,23 @@ class CropBoxWrapper extends React.Component {
     },
     src: placeholder,
     previews: [],
+    onChange: noop,
+    onChanging: noop,
   }
 
   constructor(props) {
     super(props)
-    this.state = { dragging: null, crop_box: props.crop_box, click: false }
+    this.state = {
+      dragging: null,
+      size: props.size,
+      cropBox: normalize(props.cropBox),
+    }
 
     this.elementRef = el => (this.element = el)
     this.imageRef = img => (this.getRelativePosition = getRelativePosition(img))
+
+    this.onChange = () => this.props.onChange(this.state.cropBox)
+    this.onChanging = () => this.props.onChanging(this.state.cropBox)
 
     this.startDragHandleFactory = this.startDragHandleFactory.bind(this)
 
@@ -43,7 +54,11 @@ class CropBoxWrapper extends React.Component {
       startMoveCropBox: this.startMoveCropBox.bind(this),
       moveDragHandle: this.moveDragHandle.bind(this),
       endDragHandle: this.endDragHandle.bind(this),
+      clickInner: this.clickInner.bind(this),
     }
+  }
+  componentDidMount() {
+    this.setImageSize()
   }
 
   setImageSize = () => {
@@ -53,22 +68,14 @@ class CropBoxWrapper extends React.Component {
       .catch(err => this.setState({ error: true }))
   }
 
-  componentDidMount() {
-    this.setImageSize()
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.src != this.props.src) this.setImageSize()
-  }
-
   startNewCrop(e) {
     this.element.setPointerCapture(e.pointerId)
     // e.preventDefault()
     const [mx, my] = this.getRelativePosition(e)
-    const { crop_box } = this.state
+    const { cropBox } = this.state
     this.setState({
-      crop_box: {
-        ...crop_box,
+      cropBox: {
+        ...cropBox,
         left: mx,
         top: my,
         right: mx,
@@ -78,17 +85,17 @@ class CropBoxWrapper extends React.Component {
         cursor: 'move',
         dragMask: [1, 1, 0, 0, 0],
         initialPosition: [mx, my],
-        initialCrop: crop_box,
+        initialCrop: cropBox,
       },
     })
   }
 
   moveDragHandle(e) {
-    const { click, crop_box, dragging } = this.state
+    const { cropBox, dragging } = this.state
     if (!dragging) return
     const [mx, my] = this.getRelativePosition(e)
     const { dragMask, initialPosition: [ix, iy], initialCrop: ic } = dragging
-    let { x, y, left, top, right, bottom } = crop_box
+    let { x, y, left, top, right, bottom } = cropBox
     let [dl, dt, dr, db, dc] = dragging.dragMask
     const dx = mx - ix
     const dy = my - iy
@@ -106,14 +113,12 @@ class CropBoxWrapper extends React.Component {
     }
     top > bottom && ([dt, db] = [db, dt])
     left > right && ([dl, dr] = [dr, dl])
-    if (click) {
-      if (Math.abs(dx) + Math.abs(dy) > 0.05) this.setState({ click: false })
-      else return
-    }
     this.setState({
       dragging: { ...this.state.dragging, dragMask: [dl, dt, dr, db, dc] },
-      crop_box: normalize({ x, y, left, top, right, bottom }),
+      cropBox: normalize({ x, y, left, top, right, bottom }),
+      click: false,
     })
+    this.onChanging()
   }
 
   startDragHandleFactory(dragMask, cursor = 'move') {
@@ -123,7 +128,7 @@ class CropBoxWrapper extends React.Component {
         dragging: {
           cursor,
           dragMask,
-          initialCrop: this.state.crop_box,
+          initialCrop: this.state.cropBox,
           initialPosition: this.getRelativePosition(e),
         },
       }
@@ -134,11 +139,8 @@ class CropBoxWrapper extends React.Component {
   }
 
   startMoveCropBox(e) {
-    this.startDragHandleFactory([1, 1, 1, 1, 0])(e)
     this.setState({ click: true })
-    // use 200 ms delay to simulate click with pointer events
-    // TODO: use onclick instead ?
-    setTimeout(() => this.setState({ click: false }), 200)
+    this.startDragHandleFactory([1, 1, 1, 1, 0])(e)
   }
 
   startMoveCross(e) {
@@ -146,39 +148,44 @@ class CropBoxWrapper extends React.Component {
   }
 
   endDragHandle(e) {
-    const { click, crop_box, dragging } = this.state
-    if (!dragging) return
-    let new_crop_box
-    if (click) {
-      const { initialCrop, initialPosition: [x, y] } = dragging
-      new_crop_box = { ...initialCrop, x, y }
-    } else {
-      new_crop_box = minsize(0.1)(crop_box)
-    }
-    this.setState({ crop_box: new_crop_box, dragging: null, click: false })
+    this.getRelativePosition(e)
+    const { click, cropBox, dragging } = this.state
+    if (click || !dragging) return
+    this.setState({
+      cropBox: minsize(0.1)(cropBox),
+      dragging: null,
+    })
+    this.onChange()
+  }
+
+  clickInner(e) {
+    const { cropBox, click } = this.state
+    if (!click) return
+    const [x, y] = this.getRelativePosition(e)
+    this.setState({
+      dragging: false,
+      click: false,
+      cropBox: normalize({ ...cropBox, x, y }),
+    })
+    this.onChange()
   }
 
   render() {
     const { src, previews, Loader } = this.props
-    const { error, size, dragging, crop_box } = this.state
+    const { error, size, dragging, cropBox } = this.state
     const props = {
       src,
       size,
       dragging,
-      crop_box,
+      cropBox,
       imageRef: this.imageRef,
       elementRef: this.elementRef,
       startDragHandleFactory: this.startDragHandleFactory,
       ...this.eventHandlers,
     }
 
-    if (!size) {
-      return (
-        <div className="CropBoxContainer">
-          {error ? <Loader error /> : <Loader />}
-        </div>
-      )
-    }
+    if (!size)
+      return <div className="CropBoxContainer">{error && <Loader error />}</div>
 
     return (
       <div className="CropBoxContainer">
@@ -187,7 +194,7 @@ class CropBoxWrapper extends React.Component {
             aspects={previews}
             size={size}
             src={src}
-            crop_box={crop_box}
+            cropBox={cropBox}
           />
         )}
         <CropBox {...props} />

@@ -55,14 +55,14 @@ const closeCrop = (x, y, l, r, t, b, A) => {
   return { left: X - W, right: X + W, top: Y - H, bottom: Y + H }
 }
 
-export const getStyles = (src, crop_box, imgRatio, frameRatio) => {
+export const getStyles = (src, cropBox, imgRatio, frameRatio) => {
   const { left, top, right, bottom } = closeCrop(
-    crop_box.x,
-    crop_box.y,
-    crop_box.left,
-    crop_box.right,
-    crop_box.top,
-    crop_box.bottom,
+    cropBox.x,
+    cropBox.y,
+    cropBox.left,
+    cropBox.right,
+    cropBox.top,
+    cropBox.bottom,
     frameRatio / imgRatio,
   )
   const width = right - left

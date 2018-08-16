@@ -8,12 +8,13 @@ const CropBox = ({
   error,
   size,
   dragging,
-  crop_box,
+  cropBox,
   moveDragHandle,
   endDragHandle,
   startNewCrop,
   startMoveCross,
   startMoveCropBox,
+  clickInner,
   startDragHandleFactory,
 }) => (
   <div
@@ -36,13 +37,14 @@ const CropBox = ({
         height="100%"
       />
       <Overlay
-        crop_box={crop_box}
+        cropBox={cropBox}
         size={size}
         dragging={dragging}
         startNewCrop={startNewCrop}
         startMoveCross={startMoveCross}
         startMoveCropBox={startMoveCropBox}
         startDragHandleFactory={startDragHandleFactory}
+        clickInner={clickInner}
       />
     </svg>
   </div>
