@@ -18,7 +18,7 @@ const noop = () => null
 class CropBoxWrapper extends React.Component {
   static defaultProps = {
     Loader,
-    cropBox: {
+    value: {
       left: 0.1,
       right: 0.9,
       top: 0.1,
@@ -37,7 +37,7 @@ class CropBoxWrapper extends React.Component {
     this.state = {
       dragging: null,
       size: props.size,
-      cropBox: normalize(props.cropBox),
+      cropBox: normalize(props.value),
     }
 
     this.elementRef = el => (this.element = el)
@@ -54,11 +54,14 @@ class CropBoxWrapper extends React.Component {
       startMoveCropBox: this.startMoveCropBox.bind(this),
       moveDragHandle: this.moveDragHandle.bind(this),
       endDragHandle: this.endDragHandle.bind(this),
-      clickInner: this.clickInner.bind(this),
     }
   }
   componentDidMount() {
     this.setImageSize()
+  }
+  componentDidUpdate(prevProps) {
+    if (prevProps.value != this.props.value)
+      this.setState({ cropBox: normalize(this.props.value) })
   }
 
   setImageSize = () => {
@@ -68,31 +71,9 @@ class CropBoxWrapper extends React.Component {
       .catch(err => this.setState({ error: true }))
   }
 
-  startNewCrop(e) {
-    this.element.setPointerCapture(e.pointerId)
-    // e.preventDefault()
-    const [mx, my] = this.getRelativePosition(e)
-    const { cropBox } = this.state
-    this.setState({
-      cropBox: {
-        ...cropBox,
-        left: mx,
-        top: my,
-        right: mx,
-        bottom: my,
-      },
-      dragging: {
-        cursor: 'move',
-        dragMask: [1, 1, 0, 0, 0],
-        initialPosition: [mx, my],
-        initialCrop: cropBox,
-      },
-    })
-  }
-
   moveDragHandle(e) {
-    const { cropBox, dragging } = this.state
-    if (!dragging) return
+    const { cropBox, dragging, click } = this.state
+    if (!dragging || e.pointerId != dragging.pointerId) return
     const [mx, my] = this.getRelativePosition(e)
     const { dragMask, initialPosition: [ix, iy], initialCrop: ic } = dragging
     let { x, y, left, top, right, bottom } = cropBox
@@ -113,33 +94,61 @@ class CropBoxWrapper extends React.Component {
     }
     top > bottom && ([dt, db] = [db, dt])
     left > right && ([dl, dr] = [dr, dl])
+    if (click == e.pointerId) {
+      if (Math.abs(dx) + Math.abs(dy) > 0.03) this.setState({ click: null })
+      else return
+    }
     this.setState({
       dragging: { ...this.state.dragging, dragMask: [dl, dt, dr, db, dc] },
       cropBox: normalize({ x, y, left, top, right, bottom }),
-      click: false,
     })
     this.onChanging()
   }
 
   startDragHandleFactory(dragMask, cursor = 'move') {
     return e => {
-      this.element.setPointerCapture(e.pointerId)
+      const pointerId = e.pointerId
+      this.element.setPointerCapture(pointerId)
       const update = {
         dragging: {
           cursor,
           dragMask,
           initialCrop: this.state.cropBox,
           initialPosition: this.getRelativePosition(e),
+          pointerId,
         },
       }
       // use setTimeout here to avoid losing pointer capture when handle
       // disappears from the dom
-      setTimeout(() => this.setState(update), 0)
+      setTimeout(() => this.setState(update))
     }
   }
 
+  endDragHandle(e) {
+    const { click, dragging } = this.state
+    if (!dragging || e.pointerId != dragging.pointerId) return
+    let { cropBox } = this.state
+    if (click == e.pointerId) {
+      const [x, y] = this.getRelativePosition(e)
+      cropBox = { ...cropBox, x, y }
+    }
+    const stateUpdate = {
+      cropBox: minsize(0.1)(cropBox),
+      dragging: null,
+      click: null,
+    }
+    this.setState(stateUpdate)
+    this.onChange()
+  }
+
   startMoveCropBox(e) {
-    this.setState({ click: true })
+    //if (this.state.dragging) return
+    const pointerId = e.pointerId
+    this.setState({ click: pointerId })
+    const cancelClick = () =>
+      this.state.click == pointerId && this.setState({ click: null })
+
+    setTimeout(cancelClick, 300)
     this.startDragHandleFactory([1, 1, 1, 1, 0])(e)
   }
 
@@ -147,27 +156,11 @@ class CropBoxWrapper extends React.Component {
     this.startDragHandleFactory([0, 0, 0, 0, 1])(e)
   }
 
-  endDragHandle(e) {
-    this.getRelativePosition(e)
-    const { click, cropBox, dragging } = this.state
-    if (click || !dragging) return
-    this.setState({
-      cropBox: minsize(0.1)(cropBox),
-      dragging: null,
-    })
-    this.onChange()
-  }
-
-  clickInner(e) {
-    const { cropBox, click } = this.state
-    if (!click) return
-    const [x, y] = this.getRelativePosition(e)
-    this.setState({
-      dragging: false,
-      click: false,
-      cropBox: normalize({ ...cropBox, x, y }),
-    })
-    this.onChange()
+  startNewCrop(e) {
+    const [mx, my] = this.getRelativePosition(e)
+    const point = { left: mx, right: mx, top: my, bottom: my }
+    this.setState({ cropBox: { ...this.state.cropBox, ...point } })
+    this.startDragHandleFactory([1, 1, 0, 0, 0], 'move')(e)
   }
 
   render() {

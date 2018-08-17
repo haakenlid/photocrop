@@ -18,12 +18,12 @@ let PreviewImg = ({ src, cropBox, size, aspect, style = {} }) => {
 const CropPreview = ({ aspects = [2], flexDirection = 'row', ...image }) => {
   const smallest = Math.min(...aspects)
   return (
-    <div className="CropPreview" style={{ flexDirection }}>
+    <div className="CropPreview" key={aspects} style={{ flexDirection }}>
       {aspects.map((aspect, i) => (
         <PreviewImg
           key={i}
           aspect={aspect}
-          style={{ flex: aspect / smallest }}
+          style={{ flexGrow: aspect / smallest }}
           {...image}
         />
       ))}

@@ -14,13 +14,11 @@ const CropBox = ({
   startNewCrop,
   startMoveCross,
   startMoveCropBox,
-  clickInner,
   startDragHandleFactory,
 }) => (
   <div
     ref={elementRef}
     onPointerMove={moveDragHandle}
-    onPointerUp={endDragHandle}
     onLostPointerCapture={endDragHandle}
     className="CropBox"
   >
@@ -44,7 +42,6 @@ const CropBox = ({
         startMoveCross={startMoveCross}
         startMoveCropBox={startMoveCropBox}
         startDragHandleFactory={startDragHandleFactory}
-        clickInner={clickInner}
       />
     </svg>
   </div>

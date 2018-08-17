@@ -39,7 +39,6 @@ const Overlay = ({
   startMoveCross,
   startMoveCropBox,
   startNewCrop,
-  clickInner,
   dragging,
 }) => {
   const { left, x, right, top, y, bottom } = cropBox
@@ -64,12 +63,7 @@ const Overlay = ({
           onPointerDown={startNewCrop}
         />
         <g className={`inside${pending ? ' pending' : ''}`}>
-          <path
-            onClick={clickInner}
-            onPointerDown={startMoveCropBox}
-            className="box"
-            d={boxPath}
-          />
+          <path onPointerDown={startMoveCropBox} className="box" d={boxPath} />
           {dragging ? null : (
             <svg
               className="handles"

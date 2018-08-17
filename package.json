@@ -21,6 +21,7 @@
     "react-dom": "^16.4.2"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^4.0.0-alpha.16",
     "@storybook/addon-knobs": "^4.0.0-alpha.16",
     "@storybook/addons": "^4.0.0-alpha.16",
     "@storybook/react": "^4.0.0-alpha.16",
