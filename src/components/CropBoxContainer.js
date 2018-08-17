@@ -60,7 +60,7 @@ class CropBoxWrapper extends React.Component {
     this.setImageSize()
   }
   componentDidUpdate(prevProps) {
-    if (prevProps.value != this.props.value)
+    if (!this.state.dragging && prevProps.value != this.props.value)
       this.setState({ cropBox: normalize(this.props.value) })
   }
 
