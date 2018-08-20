@@ -5,6 +5,7 @@ import {
   normalize,
   minsize,
 } from '../utils.js'
+import { getCursor } from './cursors.js'
 import CropBox from './CropBox.js'
 import CropPreview from './CropPreview.js'
 import placeholder from './placeholder.svg'
@@ -77,7 +78,7 @@ class CropBoxWrapper extends React.Component {
     const { cropBox, dragging, click } = this.state
     if (!dragging || e.pointerId != dragging.pointerId) return
     const [mx, my] = this.getRelativePosition(e)
-    const { dragMask, initialPosition: [ix, iy], initialCrop: ic } = dragging
+    const { initialPosition: [ix, iy], initialCrop: ic } = dragging
     let { x, y, left, top, right, bottom } = cropBox
     let [dl, dt, dr, db, dc] = dragging.dragMask
     const dx = mx - ix
@@ -100,8 +101,14 @@ class CropBoxWrapper extends React.Component {
       if (Math.abs(dx) + Math.abs(dy) > 0.03) this.setState({ click: null })
       else return
     }
+    const dragMask = [dl, dt, dr, db, dc]
+    const cursor = getCursor(dragMask) || dragging.cursor
     const stateUpdate = {
-      dragging: { ...dragging, dragMask: [dl, dt, dr, db, dc] },
+      dragging: {
+        ...dragging,
+        cursor,
+        dragMask,
+      },
       cropBox: normalize({ x, y, left, top, right, bottom }),
     }
     this.setState(stateUpdate, this.onChanging)
@@ -109,47 +116,48 @@ class CropBoxWrapper extends React.Component {
 
   startDragHandleFactory(dragMask, cursor = 'move') {
     return e => {
-      const initialCrop = { ...this.state.cropBox }
-      const initialPosition = this.getRelativePosition(e)
       const pointerId = e.pointerId
+      const initialPosition = this.getRelativePosition(e)
       e.preventDefault()
       e.stopPropagation()
       this.element.setPointerCapture(pointerId)
 
-      if (dragMask[4]) {
-        initialCrop.x = initialPosition[0]
-        initialCrop.y = initialPosition[1]
-      }
-
-      const dragging = {
-        dragMask,
-        cursor,
-        pointerId,
-        initialPosition,
-        initialCrop,
-      }
       // use setTimeout here to avoid losing pointer capture when handle
       // disappears from the dom
       clearTimeout(this.timeout)
       this.timeout = setTimeout(() =>
-        this.setState({ dragging, cropBox: initialCrop }),
+        this.setState(state => ({
+          ...state,
+          dragging: {
+            dragMask,
+            cursor,
+            pointerId,
+            initialPosition,
+            initialCrop: state.cropBox,
+          },
+        })),
       )
     }
   }
 
   endDragHandle(e) {
     clearTimeout(this.timeout)
-    const { cropBox, click, dragging } = this.state
-    const stateUpdate = {
-      cropBox: minsize(0.1)(cropBox),
-      dragging: null,
-      click: null,
-    }
-    if (click == e.pointerId) {
+    if (this.state.click == e.pointerId) {
       const [x, y] = this.getRelativePosition(e)
-      stateUpdate.cropBox = { ...stateUpdate.cropBox, x, y }
+      this.setState(({ cropBox, ...state }) => ({
+        ...state,
+        cropBox: { ...cropBox, x, y },
+        click: null,
+      }))
     }
-    this.setState(stateUpdate, this.onChange)
+    this.setState(
+      ({ cropBox, ...state }) => ({
+        ...state,
+        cropBox: minsize(0.1)(cropBox),
+        dragging: null,
+      }),
+      this.onChange,
+    )
   }
 
   startMoveCropBox(e) {
@@ -164,6 +172,14 @@ class CropBoxWrapper extends React.Component {
   }
 
   startMoveCross(e) {
+    const [x, y] = this.getRelativePosition(e)
+    this.setState(
+      state => ({
+        ...state,
+        cropBox: { ...state.cropBox, x, y },
+      }),
+      this.onChanging,
+    )
     this.startDragHandleFactory([0, 0, 0, 0, 1], 'crosshair')(e)
   }
 
@@ -171,7 +187,7 @@ class CropBoxWrapper extends React.Component {
     const [mx, my] = this.getRelativePosition(e)
     const point = { left: mx, right: mx, top: my, bottom: my }
     this.setState({ cropBox: { ...this.state.cropBox, ...point } })
-    this.startDragHandleFactory([1, 1, 0, 0, 0], 'move')(e)
+    this.startDragHandleFactory([1, 1, 0, 0], 'move')(e)
   }
 
   render() {

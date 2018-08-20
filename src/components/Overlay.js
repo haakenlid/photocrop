@@ -1,19 +1,13 @@
 import React from 'react'
+import { cursors, getCursor } from './cursors.js'
 
-const cursors = new Map([
-  ['1000', 'ew-resize'],
-  ['0010', 'ew-resize'],
-  ['0100', 'ns-resize'],
-  ['0001', 'ns-resize'],
-  ['1100', 'nw-resize'],
-  ['0110', 'ne-resize'],
-  ['0011', 'se-resize'],
-  ['1001', 'sw-resize'],
-])
-
-const Handle = ({ name, cursor, startDragHandleFactory }) => {
-  const handleSize = 0.2
-  const mask = name.split('').map(parseFloat)
+const Handle = ({
+  name,
+  cursor,
+  mask,
+  startDragHandleFactory,
+  handleSize = 0.2,
+}) => {
   return (
     <rect
       className="Handle"
@@ -74,11 +68,9 @@ const Overlay = ({
               x={left}
               y={top}
             >
-              {Array.from(cursors).map(([name, cursor]) => (
+              {cursors.map(props => (
                 <Handle
-                  key={name}
-                  name={name}
-                  cursor={cursor}
+                  {...props}
                   startDragHandleFactory={startDragHandleFactory}
                 />
               ))}
