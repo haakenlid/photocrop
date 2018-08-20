@@ -1,4 +1,5 @@
 docs/
 stories/
 .storybook/
+.sass-cache
 webpack.config.js
