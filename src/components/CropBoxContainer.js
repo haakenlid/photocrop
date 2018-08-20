@@ -72,6 +72,8 @@ class CropBoxWrapper extends React.Component {
   }
 
   moveDragHandle(e) {
+    e.preventDefault()
+    e.stopPropagation()
     const { cropBox, dragging, click } = this.state
     if (!dragging || e.pointerId != dragging.pointerId) return
     const [mx, my] = this.getRelativePosition(e)
@@ -107,18 +109,31 @@ class CropBoxWrapper extends React.Component {
 
   startDragHandleFactory(dragMask, cursor = 'move') {
     return e => {
+      const initialCrop = { ...this.state.cropBox }
+      const initialPosition = this.getRelativePosition(e)
+      const pointerId = e.pointerId
+      e.preventDefault()
+      e.stopPropagation()
+      this.element.setPointerCapture(pointerId)
+
+      if (dragMask[4]) {
+        initialCrop.x = initialPosition[0]
+        initialCrop.y = initialPosition[1]
+      }
+
       const dragging = {
         dragMask,
         cursor,
-        pointerId: e.pointerId,
-        initialPosition: this.getRelativePosition(e),
-        initialCrop: this.state.cropBox,
+        pointerId,
+        initialPosition,
+        initialCrop,
       }
-      this.element.setPointerCapture(e.pointerId)
       // use setTimeout here to avoid losing pointer capture when handle
       // disappears from the dom
       clearTimeout(this.timeout)
-      this.timeout = setTimeout(() => this.setState({ dragging }))
+      this.timeout = setTimeout(() =>
+        this.setState({ dragging, cropBox: initialCrop }),
+      )
     }
   }
 
@@ -149,7 +164,7 @@ class CropBoxWrapper extends React.Component {
   }
 
   startMoveCross(e) {
-    this.startDragHandleFactory([0, 0, 0, 0, 1])(e)
+    this.startDragHandleFactory([0, 0, 0, 0, 1], 'crosshair')(e)
   }
 
   startNewCrop(e) {
