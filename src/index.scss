@@ -36,6 +36,7 @@ body {
   rect,
   ellipse {
     vector-effect: non-scaling-stroke;
+    shape-rendering: crispEdges;
     fill: transparent; // must have fill to capture pointer event
   }
   .outside {
@@ -45,24 +46,19 @@ body {
     position: relative;
     .Handle {
       cursor: crosshair;
-      &:hover + .cross {
-        stroke: rgba(255, 255, 0, 1);
-      }
     }
     .cross {
+      stroke: rgba(255, 255, 0, 0.6);
       pointer-events: none;
-      // shape-rendering: crispEdges;
-      vector-effect: non-scaling-stroke;
-      stroke: rgba(255, 255, 0, 0.5);
+      &.shadow {
+        stroke-width: 3px;
+        stroke: rgba(0, 0, 0, 0.05);
+      }
     }
   }
   .inside {
     .box {
-      stroke: rgba(255, 255, 255, 0.3);
-      // cursor: move;
-    }
-    &:hover .box {
-      stroke: rgba(255, 255, 255, 0.8);
+      stroke: rgba(255, 255, 255, 0.4);
     }
     &.pending .box {
       @extend %ants;

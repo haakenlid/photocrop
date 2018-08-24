@@ -22,7 +22,10 @@ const Handle = ({
 }
 
 const Cross = ({ x, y }) => (
-  <path className="cross" d={`M0, ${y}H1M${x}, 0V1`} />
+  <React.Fragment>
+    <path className="cross shadow" d={`M0, ${y}H1M${x}, 0V1`} />
+    <path className="cross" d={`M0, ${y}H1M${x}, 0V1`} />
+  </React.Fragment>
 )
 
 const Overlay = ({

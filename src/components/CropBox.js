@@ -19,8 +19,8 @@ const CropBox = ({
   <div
     ref={elementRef}
     onPointerMove={moveDragHandle}
-    onPointerUp={endDragHandle}
     onLostPointerCapture={endDragHandle}
+    onPointerUp={endDragHandle /* polyfill doesn't bubble lostpointercapture */}
     className="CropBox"
   >
     <svg
