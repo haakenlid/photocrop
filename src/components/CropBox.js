@@ -19,6 +19,7 @@ const CropBox = ({
   <div
     ref={elementRef}
     onPointerMove={moveDragHandle}
+    onPointerUp={endDragHandle}
     onLostPointerCapture={endDragHandle}
     className="CropBox"
   >

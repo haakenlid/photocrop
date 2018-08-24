@@ -141,6 +141,7 @@ class CropBoxWrapper extends React.Component {
   }
 
   endDragHandle(e) {
+    if (!this.state.dragging) return
     clearTimeout(this.timeout)
     if (this.state.click == e.pointerId) {
       const [x, y] = this.getRelativePosition(e)
