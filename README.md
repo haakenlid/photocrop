@@ -9,6 +9,10 @@ React photo cropper with svg controls.
 
 Used for parametric image cropping with multiple / unknown output image size.
 
+## Demo
+
+[storybook] demos
+
 ## Documentation
 
 nope
@@ -17,9 +21,16 @@ nope
 
 nope
 
-## Demo
+## Known issues
 
-[storybook] demos
+Uses the [pointer events] api, which is supported by most browsers, but not
+Safari. So it requires [pointer events polyfill] to work on apple devices.
+
+Also uses some svg and css features that might not be fully supported by all
+browsers. With the PEP polyfill, I think it should work in Chrome and Firefox on
+most platforms.
 
 [storybook]: https://haakenlid.github.io/photocrop/
 [example]: ./example-image.png
+[pointer events]: https://developer.mozilla.org/en-US/docs/Web/CSS/pointer-events
+[pointer events polyfill]: https://github.com/jquery/PEP
