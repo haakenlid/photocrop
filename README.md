@@ -1,5 +1,6 @@
 [![npm version](https://badge.fury.io/js/%40haakenlid%2Fphotocrop.svg)](https://badge.fury.io/js/%40haakenlid%2Fphotocrop)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![awesomeness](https://img.shields.io/badge/level%20of%20awesomeness%3F-high-red.svg)](https://img.shields.io/badge/level%20of%20awesomeness%3F-high-red.svg)
 
 # React photo cropping widget
 
